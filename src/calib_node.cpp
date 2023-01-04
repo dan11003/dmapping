@@ -1,20 +1,26 @@
+#define PCL_NO_PRECOMPILE // !! BEFORE ANY PCL INCLUDE!!
 #include "dmapping/utility.h"
 //#include "lio_sam/cloud_info.h"
 #include <pcl/PCLPointCloud2.h>
+#include "dmapping/stampeddata.h"
+using namespace dmapping;
+
+// Use the Velodyne point format as a common representation
 struct VelodynePointXYZIRT // see lio-sam for more options
 {
     PCL_ADD_POINT4D
     PCL_ADD_INTENSITY;
-    uint16_t ring;
+    std::uint16_t ring;
     float time;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
 POINT_CLOUD_REGISTER_POINT_STRUCT (VelodynePointXYZIRT,
-    (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity)
-    (uint16_t, ring, ring) (float, time, time)
-)
-
-// Use the Velodyne point format as a common representation
+                                   (float, x, x)
+                                   (float, y, y)
+                                   (float, z, z)
+                                   (float, intensity, intensity)
+                                   (uint16_t, ring, ring) (float, time, time)
+                                   )
 using PointXYZIRT = VelodynePointXYZIRT;
 
 const int queueLength = 2000;
@@ -24,7 +30,6 @@ class ImageProjection : public ParamServer
 private:
 
     std::mutex imuLock;
-    std::mutex odoLock;
 
     ros::Subscriber subLaserCloud;
     ros::Publisher  pubLaserCloud;
@@ -33,10 +38,7 @@ private:
     ros::Publisher pubLaserCloudInfo;
 
     ros::Subscriber subImu;
-    std::deque<sensor_msgs::Imu> imuQueue;
 
-    ros::Subscriber subOdom;
-    std::deque<nav_msgs::Odometry> odomQueue;
 
     std::deque<sensor_msgs::PointCloud2> cloudQueue;
     sensor_msgs::PointCloud2 currentCloudMsg;
@@ -59,14 +61,10 @@ private:
     cv::Mat rangeMat;
 
     bool odomDeskewFlag;
-    float odomIncreX;
-    float odomIncreY;
-    float odomIncreZ;
-
-
     double timeScanCur;
     double timeScanEnd;
     std_msgs::Header cloudHeader;
+    dmapping::ImuHandler imuBuffer;
 
 
 public:
@@ -124,30 +122,34 @@ public:
 
     void imuHandler(const sensor_msgs::Imu::ConstPtr& imuMsg)
     {
-        sensor_msgs::Imu thisImu = imuConverter(*imuMsg);
-
         std::lock_guard<std::mutex> lock1(imuLock);
-        imuQueue.push_back(thisImu);
-
-        Eigen::Quaterniond eigRot(thisImu.orientation.w, thisImu.orientation.x, thisImu.orientation.y, thisImu.orientation.z);
-        Eigen::Affine3d tImuPose(eigRot);
-
+        sensor_msgs::Imu thisImu = *imuMsg;
+        thisImu.header.stamp.nsec = thisImu.header.stamp.nsec*1000;
+        static sensor_msgs::Imu prevImu = thisImu;
+        if(  thisImu.header.stamp - prevImu.header.stamp < ros::Duration(0.0005) )
+          return;
+        else
+          prevImu = thisImu;
+        imuBuffer.Add(thisImu);
+        /*
         static tf::TransformBroadcaster Tbr;
-        tf::Transform Tf;
-        std::vector<tf::StampedTransform> trans_vek;
-        tf::transformEigenToTF(tImuPose, Tf);
-        trans_vek.push_back(tf::StampedTransform(Tf, imuMsg->header.stamp, "imu_fixed", "imu"));
-        Tbr.sendTransform(trans_vek);
-
+        const double tsearch = thisImu.header.stamp.toSec() - 1.0;
+        Eigen::Quaterniond qPrev;
+        if(imuBuffer.Get(tsearch , qPrev)){
+          Eigen::Affine3d tImuPose(qPrev);
+          tf::Transform Tf;
+          std::vector<tf::StampedTransform> trans_vek;
+          tf::transformEigenToTF(tImuPose, Tf);
+          trans_vek.push_back(tf::StampedTransform(Tf, imuMsg->header.stamp, "imu_fixed", "imu_past"));
+          Tbr.sendTransform(trans_vek);
+        }*/
     }
 
     bool CanBeDeskewed()
     {
         std::lock_guard<std::mutex> lock1(imuLock);
-        std::lock_guard<std::mutex> lock2(odoLock);
-
         // make sure IMU data available for the scan
-        if (imuQueue.empty() || imuQueue.front().header.stamp.toSec() > timeScanCur || imuQueue.back().header.stamp.toSec() < timeScanEnd)
+        if (!imuBuffer.TimeContained(timeScanCur))
         {
             ROS_DEBUG("Waiting for IMU data ...");
             return false;
@@ -160,6 +162,7 @@ public:
         if (!cachePointCloud(laserCloudMsg))
             return;
         if(!CanBeDeskewed()){
+          cout << "problem" << endl;
           return;
         }
         else{
@@ -172,6 +175,15 @@ public:
 
     }
     void Deskew(){
+      float tmax = -1, tmin = 1;
+
+      for(auto&& p : laserCloudIn->points){
+        tmin = std::min(tmin, p.time);
+        tmax = std::max(tmax, p.time);
+        //cout << p.ring << ", " << p.time << endl;
+      }
+      cout << "max: " << tmax << ", min: " << tmin << endl;
+
 
 
     }
