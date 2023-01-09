@@ -1,10 +1,15 @@
 #pragma once
 
-#include <dmapping/utility.h>
+
 #include "ros/ros.h"
 #include <map>
 #include <algorithm>
 #include "sensor_msgs/Imu.h" 
+#include "dmapping/scanType.h"
+#include "pcl_conversions/pcl_conversions.h"
+#include <dmapping/utility.h>
+#include "math.h"
+
 
 /* A steam of time stamped data  for lookup*/
 namespace dmapping {
@@ -19,7 +24,7 @@ public:
 
   ImuHandler(){}
 
-  void Add(sensor_msgs::Imu& data);
+  void AddMsg(sensor_msgs::Imu::ConstPtr msg);
 
   bool Get(const double& tStamp, Eigen::Quaterniond& data);
 
@@ -29,14 +34,55 @@ public:
 
   std::vector<stampedImu>::iterator begin() {return data_.begin();}
 
-
+  std::size_t size(){return data_.size();}
 
 private:
+
+  void Add(sensor_msgs::Imu& msg);
 
   std::vector<stampedImu> data_;
 
   double first = 0;
 
+
+};
+
+
+
+class Scan{
+
+public:
+
+  Scan(Cloud::Ptr cloudInput);
+
+  Cloud::Ptr GetCloud();
+
+  double GetStamp() const;
+
+  Cloud::Ptr cloud_;
+  double stamp_;
+
+};
+
+class ScanHandler{
+
+public:
+
+  ScanHandler(){}
+
+  void AddMsg(sensor_msgs::PointCloud2::ConstPtr laserCloudMsg);
+
+  std::vector<Scan>::iterator end() { return data_.end(); }
+
+  std::vector<Scan>::iterator begin() { return data_.begin(); }
+
+  size_t size() {return data_.size();}
+
+  std::vector<Scan> data_;
+
+private:
+
+  void Add(Cloud::Ptr cloud);
 
 };
 

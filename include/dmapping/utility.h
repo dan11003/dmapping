@@ -1,5 +1,9 @@
+
 #pragma once
-#define PCL_NO_PRECOMPILE
+#ifndef UTILITY_H
+#define UTILITY_H
+#include "dmapping/velodynepoint.h"
+
 #include <ros/ros.h>
 
 #include <std_msgs/Header.h>
@@ -42,21 +46,36 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
+#include "pcl/point_types.h"
+#include "rosbag/bag.h"
+#include "rosbag/view.h"
 
+#include "dmapping/velodynepoint.h"
+#include "pcl_ros/point_cloud.h"
+#include "pcl_ros/publisher.h"
+#include "tf/transform_broadcaster.h"
+
+using std::cout; using std::endl;
+
+using pointT = dmapping::PointXYZIRT;
+typedef pcl::PointCloud<pointT> Cloud;
 
 namespace dmapping {
-using namespace std;
 
-typedef std::numeric_limits< double > dbl;
-
-typedef pcl::PointXYZI PointType;
+typedef std::vector<Eigen::Affine3d,Eigen::aligned_allocator<Eigen::Affine3d> > VectorAffine3d;
 
 
-enum class SensorType { MULRAN, VELODYNE, OUSTER };
+void PublishCloud(const std::string& topic, pcl::PointCloud<pointT>& cloud, const std::string& frame_id, const ros::Time& t);
+
+void PublishTF(const std::string& fixed_id, const std::string& frame_id, const Eigen::Affine3d& T, const ros::Time& t);
+
+Eigen::Quaterniond euler2Quaternion(const double roll, const double pitch, const double yaw);
+
+double GetRelTime(const double t);
 
 //using PointXYZIRT = VelodynePointXYZIRT;
-//typedef pcl::PointCloud<VelodynePointXYZIRT> VCloud;
-
+//typedef pcl::PointCloud<VMapPointNormalelodynePointXYZIRT> VCloud;
+/*
 class ParamServer
 {
 public:
@@ -170,6 +189,8 @@ void saveSCD(std::string fileName, Eigen::MatrixXd matrix, std::string delimiter
 
 std::string padZeros(int val, int num_digits = 6);
 
-
+*/
 
 }
+
+#endif

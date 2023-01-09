@@ -35,25 +35,104 @@
 #include "tf_conversions/tf_eigen.h"
 #include "eigen_conversions/eigen_kdl.h"
 #include "eigen_conversions/eigen_msg.h"
-
+#include "memory.h"
 
 
 #include "dmapping/utility.h"
-#include "dmapping/stampeddata.h"
+#include "dmapping/dataHandler.h"
 
 
 namespace dmapping{
 
-class DmappingFuser
+class rosbagReader{
+public:
+  struct Parameters
+  {
+    std::string imuTopic = "";
+    std::string lidarTopic = "";
+    std::string bagPath = "";
+
+    void ReadRosParameters(ros::NodeHandle& nh){
+
+
+      cout << "Load parameters" << endl;
+      nh.param<std::string>("/imuTopic", this->imuTopic, "");
+      nh.param<std::string>("/lidarTopic", this->lidarTopic, "");
+      nh.param<std::string>("/bagPath", this->bagPath, "");
+      cout << this->imuTopic << endl;
+      cout << this->lidarTopic << endl;
+      cout << this->bagPath << endl;
+      std::vector<std::string> parNames;
+      bool status = nh.getParamNames(parNames);
+      for(auto s : parNames)
+        cout <<"\t" << s << "\n";
+    }
+  };
+
+  rosbagReader(ImuHandler& imuHandler, ScanHandler& scanHandler, Parameters& par): imuHandler_(imuHandler), scanHandler_(scanHandler), par_(par) {}
+
+  size_t Read();
+
+private:
+  ImuHandler& imuHandler_;
+  ScanHandler& scanHandler_;
+
+  rosbag::Bag bag_;
+  Parameters par_;
+
+};
+
+
+class LidarBatch
 {
 public:
-  DmappingFuser() {}
+  struct Parameters
+  {
+    std::string world_frame = "world";
+    std::string sensor_frame = "velodyne";
+    double roll = 0, pitch = 0, yaw = 3.14;
+    void ReadRosParameters(ros::NodeHandle& nh){
 
+      cout << "Load parameters" << endl;
+      nh.param<double>("/extrinsicsPitch", this->pitch, 0.0);
+      nh.param<double>("/extrinsicsRoll", this->roll,  0.0);
+      nh.param<double>("/extrinsicsYaw", this->yaw,    0.0);
+      cout << this->roll << endl;
+      cout << this->pitch << endl;
+      cout << this->yaw << endl;
+    }
+  };
+  LidarBatch();
 
-  //std::vector<VCloud> clouds_;
   ImuHandler imuHandler_;
+  ScanHandler scanHandler_;
+  std::shared_ptr<rosbagReader> reader;
 
 
+  void Prune();
+
+  void Visualize();
+
+private:
+
+  VectorAffine3d poses_;
+  VectorAffine3d measurements_;
+
+  ros::NodeHandle nh;
+  Parameters par_;
+
+  Eigen::Quaterniond extrinsicsLid2imu;
+
+};
+
+class Fuser
+{
+public:
+  Fuser(LidarBatch& batch) : batch_(batch) {}
+
+  std::vector<Eigen::Affine3d> trajectory_;
+
+  LidarBatch& batch_;
 };
 
 }

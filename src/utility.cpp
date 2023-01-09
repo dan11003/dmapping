@@ -2,8 +2,42 @@
 
 namespace dmapping {
 
+void PublishCloud(const std::string& topic, pcl::PointCloud<pointT>& cloud, const std::string& frame_id, const ros::Time& t){
 
+  pcl_conversions::toPCL(t,cloud.header.stamp);
+  cloud.header.frame_id = frame_id;
 
+  static std::map<std::string, ros::Publisher> pubs;
+  std::map<std::string, ros::Publisher>::iterator it = pubs.find(topic);
+  static ros::NodeHandle nh("~");
+  if (it == pubs.end()){
+    pubs[topic] =  nh.advertise<pcl::PointCloud<pointT> >(topic,100);
+  }
+  pubs[topic].publish(cloud);
+}
+void PublishTF(const std::string& fixed_id, const std::string& frame_id, const Eigen::Affine3d& T, const ros::Time& t){
+  static tf::TransformBroadcaster Tbr;
+  tf::Transform Tf;
+  std::vector<tf::StampedTransform> trans_vek;
+  tf::transformEigenToTF(T, Tf);
+  trans_vek.push_back(tf::StampedTransform(Tf, t, fixed_id, frame_id));
+  Tbr.sendTransform(trans_vek);
+}
+Eigen::Quaterniond euler2Quaternion(const double roll, const double pitch, const double yaw)
+{
+  Eigen::AngleAxisd rollAngle(roll*M_PI/180.0, Eigen::Vector3d::UnitX());
+  Eigen::AngleAxisd pitchAngle(pitch*M_PI/180.0, Eigen::Vector3d::UnitY());
+  Eigen::AngleAxisd yawAngle(yaw*M_PI/180.0, Eigen::Vector3d::UnitZ());
+
+  Eigen::Quaterniond q = rollAngle * yawAngle * pitchAngle;
+  return q;
+}
+double GetRelTime(const double t){
+  static double tinit = t;
+  return t - tinit;
+}
+
+/*
 ParamServer::ParamServer()
 {
     cout << "pars "<< endl;
@@ -114,5 +148,5 @@ void saveSCD(std::string fileName, Eigen::MatrixXd matrix, std::string delimiter
     }
 }
 
-
+*/
 }

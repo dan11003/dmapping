@@ -41,6 +41,8 @@
 <exec_depend>geometry_msgs</exec_depend>
 <build_depend>nav_msgs</build_depend>
 <exec_depend>nav_msgs</exec_depend>
+<build_depend>rosbag</build_depend>
+<exec_depend>rosbag</exec_depend>
 
 <build_depend>message_generation</build_depend>
 <exec_depend>message_generation</exec_depend>

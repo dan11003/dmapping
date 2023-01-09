@@ -1,4 +1,4 @@
-#include "dmapping/stampeddata.h"
+#include "dmapping/dataHandler.h"
 
 /* A steam of time stamped data  for lookup*/
 namespace dmapping {
@@ -8,6 +8,25 @@ bool compare (const stampedImu i, const stampedImu& j)
 {
   return (i.first < j.first);
 }
+
+void ImuHandler::AddMsg(sensor_msgs::Imu::ConstPtr msg){
+  sensor_msgs::Imu imuMsg = *msg;
+  if ( data_.empty()){
+    Add(imuMsg);
+    return;
+  }
+  const double tdiff = msg->header.stamp.toSec() - data_.back().first;
+  if( tdiff > 0.00001 ){
+    Add(imuMsg);
+  }
+  else{
+    //count_invalid++;
+    //ROS_INFO_STREAM_THROTTLE(1, "dublicated time stamp, " << count_invalid);
+  }
+  //cout << "dublicated time stamp, " << count_invalid << endl;;
+  //cout << "valid      time stamp, " << count_valid << endl;;
+}
+
 
 void ImuHandler::Add(sensor_msgs::Imu& data){
   Eigen::Quaterniond orient;
@@ -24,13 +43,12 @@ bool ImuHandler::Get(const double& tStamp, Eigen::Quaterniond& data){
   auto itr_after = std::lower_bound(first, last, search , compare);
   auto itr_before = std::prev(itr_after, 1);
   if(itr_after != last && itr_after != first && itr_before != first){
-
     data = first->second;
-    cout << "elements: " << data_.size() << endl;
-    cout << "search: " << tStamp << ", before: "<< itr_before->first <<", t diff" <<  itr_before->first - tStamp<<", idx: " << std::distance(data_.begin(), itr_before) << endl;
-    cout << "search: " << tStamp << ", next  : "<< itr_after->first <<", t diff" << itr_after->first - tStamp <<", idx: " << std::distance(data_.begin(), itr_after) << endl;
+    //cout << "elements: " << data_.size() << endl;
+    //cout << "search: " << GetRelTime(tStamp) << ", before: "<< GetRelTime(itr_before->first) <<", t diff" <<  itr_before->first - tStamp<<", idx: " << std::distance(data_.begin(), itr_before) << endl;
+    //cout << "search: " << tStamp << ", next  : "<< itr_after->first <<", t diff" << itr_after->first - tStamp <<", idx: " << std::distance(data_.begin(), itr_after) << endl;
     const double tSlerp = (tStamp - itr_before->first )/(itr_after->first - itr_before->first);
-    cout << tSlerp << endl;
+    //cout << tSlerp << endl;
     data = itr_before->second.slerp(tSlerp, itr_after->second);
     return true;
   }
@@ -44,6 +62,31 @@ bool ImuHandler::TimeContained(const double t){
     return false;
 }
 
+void ScanHandler::AddMsg(sensor_msgs::PointCloud2::ConstPtr laserCloudMsg_c){
+  Cloud::Ptr cloud(new Cloud);
+  sensor_msgs::PointCloud2 laserCloudMsg = *laserCloudMsg_c;
+  pcl::moveFromROSMsg(laserCloudMsg, *cloud);
+  pcl_conversions::toPCL(laserCloudMsg.header.stamp, cloud->header.stamp);
+  Add(cloud);
+}
+
+void ScanHandler::Add(Cloud::Ptr cloud)
+{
+  data_.push_back(Scan(cloud));
+}
+Scan::Scan(Cloud::Ptr cloudInput) {
+  cloud_ = cloudInput;
+  ros::Time t;
+  pcl_conversions::fromPCL(cloud_->header.stamp, t);
+  stamp_ = t.toSec();
+  //cout << ", cloud: " << GetRelTime(stamp_);
+}
+Cloud::Ptr Scan::GetCloud(){
+  return cloud_;
+}
+double Scan::GetStamp() const{
+return stamp_;
+}
 /*
 template <class T>
 void StampedData<T>::Add(const T& val, const double &stamp){

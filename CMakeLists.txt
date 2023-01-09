@@ -27,6 +27,7 @@ find_package(catkin REQUIRED
     nav_msgs
     message_generation
     tf_conversions
+    rosbag
 )
 
 
@@ -35,7 +36,8 @@ catkin_package(
     INCLUDE_DIRS include
     DEPENDS Eigen3 PCL
 #  LIBRARIES dmapping
-  CATKIN_DEPENDS eigen_conversions tf_conversions
+  CATKIN_DEPENDS eigen_conversions tf_conversions rosbag
+
 #  DEPENDS system_lib
 )
 
@@ -55,9 +57,10 @@ link_directories(
 
 ## Declare a C++ library
  set (${PROJECT_NAME}_LIB_SRCS
-   src/stampeddata.cpp
+   src/dataHandler.cpp
    src/dmappingfuser.cpp
    src/utility.cpp
+   src/scanType.cpp
 )
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_LIB_SRCS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES}  ${CERES_LIBRARIES} )
@@ -72,7 +75,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES}  ${CERES_LIBRARIES} )
 ## The recommended prefix ensures that target names across packages don't collide
 
 
- add_executable(calibNode src/calib_node.cpp)
+ add_executable(dmapping_node src/dmapping_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -85,7 +88,7 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES}  ${CERES_LIBRARIES} )
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(calibNode ${catkin_LIBRARIES} ${PROJECT_NAME})
+ target_link_libraries(dmapping_node ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 #############
 ## Install ##
