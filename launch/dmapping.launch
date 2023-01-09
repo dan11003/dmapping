@@ -1,0 +1,9 @@
+<launch>
+<rosparam file="$(find dmapping)/config/pars.yaml" command="load" />
+
+<node pkg="dmapping" type="dmapping_node" name="dmapping_node" respawn="false" output="screen"/>
+
+<node type="rviz" name="rviz" pkg="rviz" args="-d $(find dmapping)/config/config_file.rviz" />
+
+
+</launch>
