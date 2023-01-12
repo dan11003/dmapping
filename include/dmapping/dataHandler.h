@@ -49,21 +49,6 @@ private:
 
 
 
-class Scan{
-
-public:
-
-  Scan(Cloud::Ptr cloudInput);
-
-  Cloud::Ptr GetCloud();
-
-  double GetStamp() const;
-
-  Cloud::Ptr cloud_;
-  double stamp_;
-
-};
-
 class ScanHandler{
 
 public:
@@ -82,7 +67,7 @@ public:
 
 private:
 
-  void Add(Cloud::Ptr cloud);
+  void Add(RingCloud::Ptr cloud);
 
 };
 

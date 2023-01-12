@@ -83,7 +83,7 @@ void LidarBatch::Visualize(){
     if (itr_imu == imuHandler_.end() || itr_scan == scanHandler_.end()) {
       return;
     }
-    if(itr_imu->first < itr_scan->stamp_){
+    if(itr_imu->first < itr_scan->GetStamp()){
       Eigen::Affine3d tIMU(extrinsicsLid2imu*itr_imu->second);
       PublishTF(par_.world_frame, "imuOdom", tIMU, t);
       itr_imu++;
@@ -101,18 +101,17 @@ void LidarBatch::Visualize(){
 
 void LidarBatch::Prune(){
   while(ros::ok() && scanHandler_.size() > 0){
-    if (scanHandler_.begin()->stamp_ < imuHandler_.begin()->first) {
+    if (scanHandler_.begin()->GetStamp() < imuHandler_.begin()->first) {
       cout << "prune first" << endl;
       scanHandler_.data_.erase(scanHandler_.data_.begin());
     }
-    else if (scanHandler_.end()->stamp_ < imuHandler_.end()->first) {
+    else if (scanHandler_.end()->GetStamp() < imuHandler_.end()->first) {
       cout << "prune last" << endl;
       scanHandler_.data_.pop_back();
     }
     else {
       return;
     }
-
   }
 }
 

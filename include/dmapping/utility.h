@@ -16,13 +16,14 @@
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 #include "tf/transform_broadcaster.h"
+#include <pcl/kdtree/kdtree_flann.h>
 #include <opencv2/opencv.hpp>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/search/impl/search.hpp>
 #include <pcl/range_image/range_image.h>
-#include <pcl/kdtree/kdtree_flann.h>
+
 #include <pcl/common/common.h>
 #include <pcl/common/transforms.h>
 #include <pcl/registration/icp.h>
@@ -57,15 +58,16 @@
 
 using std::cout; using std::endl;
 
-using pointT = dmapping::PointXYZIRT;
-typedef pcl::PointCloud<pointT> Cloud;
+typedef pcl::PointXYZI PointType;
+typedef pcl::PointCloud<dmapping::PointXYZIRT> RingCloud;
+typedef pcl::PointCloud<PointType> Cloud;
+
 
 namespace dmapping {
 
 typedef std::vector<Eigen::Affine3d,Eigen::aligned_allocator<Eigen::Affine3d> > VectorAffine3d;
 
-
-void PublishCloud(const std::string& topic, pcl::PointCloud<pointT>& cloud, const std::string& frame_id, const ros::Time& t);
+void PublishCloud(const std::string& topic, Cloud& cloud, const std::string& frame_id, const ros::Time& t);
 
 void PublishTF(const std::string& fixed_id, const std::string& frame_id, const Eigen::Affine3d& T, const ros::Time& t);
 
@@ -137,7 +139,7 @@ public:
 
 };
 
-
+*/
 
 
 sensor_msgs::PointCloud2 publishCloud(ros::Publisher *thisPub, pcl::PointCloud<PointType>::Ptr thisCloud, ros::Time thisStamp, std::string thisFrame);
@@ -189,7 +191,7 @@ void saveSCD(std::string fileName, Eigen::MatrixXd matrix, std::string delimiter
 
 std::string padZeros(int val, int num_digits = 6);
 
-*/
+
 
 }
 

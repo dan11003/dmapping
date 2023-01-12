@@ -63,30 +63,18 @@ bool ImuHandler::TimeContained(const double t){
 }
 
 void ScanHandler::AddMsg(sensor_msgs::PointCloud2::ConstPtr laserCloudMsg_c){
-  Cloud::Ptr cloud(new Cloud);
+  RingCloud::Ptr cloud(new RingCloud);
   sensor_msgs::PointCloud2 laserCloudMsg = *laserCloudMsg_c;
   pcl::moveFromROSMsg(laserCloudMsg, *cloud);
   pcl_conversions::toPCL(laserCloudMsg.header.stamp, cloud->header.stamp);
   Add(cloud);
 }
 
-void ScanHandler::Add(Cloud::Ptr cloud)
+void ScanHandler::Add(RingCloud::Ptr cloud)
 {
   data_.push_back(Scan(cloud));
 }
-Scan::Scan(Cloud::Ptr cloudInput) {
-  cloud_ = cloudInput;
-  ros::Time t;
-  pcl_conversions::fromPCL(cloud_->header.stamp, t);
-  stamp_ = t.toSec();
-  //cout << ", cloud: " << GetRelTime(stamp_);
-}
-Cloud::Ptr Scan::GetCloud(){
-  return cloud_;
-}
-double Scan::GetStamp() const{
-return stamp_;
-}
+
 /*
 template <class T>
 void StampedData<T>::Add(const T& val, const double &stamp){

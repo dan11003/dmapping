@@ -53,8 +53,6 @@ public:
     std::string bagPath = "";
 
     void ReadRosParameters(ros::NodeHandle& nh){
-
-
       cout << "Load parameters" << endl;
       nh.param<std::string>("/imuTopic", this->imuTopic, "");
       nh.param<std::string>("/lidarTopic", this->lidarTopic, "");
@@ -62,10 +60,6 @@ public:
       cout << this->imuTopic << endl;
       cout << this->lidarTopic << endl;
       cout << this->bagPath << endl;
-      std::vector<std::string> parNames;
-      bool status = nh.getParamNames(parNames);
-      for(auto s : parNames)
-        cout <<"\t" << s << "\n";
     }
   };
 
@@ -91,18 +85,19 @@ public:
     std::string world_frame = "world";
     std::string sensor_frame = "velodyne";
     double roll = 0, pitch = 0, yaw = 3.14;
+    int N_SCAN, Horizon_SCAN;
     void ReadRosParameters(ros::NodeHandle& nh){
 
       cout << "Load parameters" << endl;
       nh.param<double>("/extrinsicsPitch", this->pitch, 0.0);
       nh.param<double>("/extrinsicsRoll", this->roll,  0.0);
       nh.param<double>("/extrinsicsYaw", this->yaw,    0.0);
+
       cout << this->roll << endl;
       cout << this->pitch << endl;
       cout << this->yaw << endl;
     }
   };
-  LidarBatch();
 
   ImuHandler imuHandler_;
   ScanHandler scanHandler_;
@@ -113,7 +108,10 @@ public:
 
   void Visualize();
 
+  LidarBatch();
+
 private:
+
 
   VectorAffine3d poses_;
   VectorAffine3d measurements_;

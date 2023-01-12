@@ -2,7 +2,7 @@
 
 namespace dmapping {
 
-void PublishCloud(const std::string& topic, pcl::PointCloud<pointT>& cloud, const std::string& frame_id, const ros::Time& t){
+void PublishCloud(const std::string& topic, Cloud& cloud, const std::string& frame_id, const ros::Time& t){
 
   pcl_conversions::toPCL(t,cloud.header.stamp);
   cloud.header.frame_id = frame_id;
@@ -11,7 +11,7 @@ void PublishCloud(const std::string& topic, pcl::PointCloud<pointT>& cloud, cons
   std::map<std::string, ros::Publisher>::iterator it = pubs.find(topic);
   static ros::NodeHandle nh("~");
   if (it == pubs.end()){
-    pubs[topic] =  nh.advertise<pcl::PointCloud<pointT> >(topic,100);
+    pubs[topic] =  nh.advertise<RingCloud>(topic,100);
   }
   pubs[topic].publish(cloud);
 }
@@ -116,7 +116,7 @@ sensor_msgs::Imu ParamServer::imuConverter(const sensor_msgs::Imu& imu_in)
 
     return imu_out;
 }
-
+*/
 std::string padZeros(int val, int num_digits) {
   std::ostringstream out;
   out << std::internal << std::setfill('0') << std::setw(num_digits) << val;
@@ -148,5 +148,5 @@ void saveSCD(std::string fileName, Eigen::MatrixXd matrix, std::string delimiter
     }
 }
 
-*/
+
 }
