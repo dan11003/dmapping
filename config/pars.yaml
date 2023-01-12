@@ -1,6 +1,6 @@
 lidarTopic: "/velodyne_points"               # Point cloud data
 imuTopic: "/nav/filtered_imu/data"                         # IMU data
-bagPath: "/home/daniel/Documents/output.bag"                         # IMU data
+bagPath: "/home/daniel/rosbag/structor/LIOSAM_test_kali.bag"                         
 extrinsicsPitch: 0
 extrinsicsRoll: 0
-extrinsicsYaw: 90
+extrinsicsYaw: 180

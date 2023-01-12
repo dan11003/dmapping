@@ -36,7 +36,7 @@ void ImuHandler::Add(sensor_msgs::Imu& data){
   data_.push_back(std::make_pair(tStamp,orient));
 }
 
-bool ImuHandler::Get(const double& tStamp, Eigen::Quaterniond& data){
+bool ImuHandler::Get(const double& tStamp, Eigen::Quaterniond& data)const {
   auto first = data_.begin();
   auto last = data_.end();
   stampedImu search = std::make_pair(tStamp,Eigen::Quaterniond());
@@ -55,7 +55,12 @@ bool ImuHandler::Get(const double& tStamp, Eigen::Quaterniond& data){
   else
     return false;
 }
-bool ImuHandler::TimeContained(const double t){
+Eigen::Quaterniond ImuHandler::Get(const double& tStamp) const{
+  Eigen::Quaterniond data;
+  Get(tStamp, data);
+  return data;
+}
+bool ImuHandler::TimeContained(const double t)const{
   if(!data_.empty() && t >= data_.front().first && t <= data_.back().first)
     return true;
   else
@@ -74,6 +79,7 @@ void ScanHandler::Add(RingCloud::Ptr cloud)
 {
   data_.push_back(Scan(cloud));
 }
+
 
 /*
 template <class T>

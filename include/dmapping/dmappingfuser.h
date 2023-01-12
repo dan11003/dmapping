@@ -44,6 +44,8 @@
 
 namespace dmapping{
 
+bool Compensate(RingCloud::Ptr input, RingCloud::Ptr compensated, const ImuHandler& handler);
+
 class rosbagReader{
 public:
   struct Parameters

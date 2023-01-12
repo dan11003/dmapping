@@ -26,9 +26,11 @@ public:
 
   void AddMsg(sensor_msgs::Imu::ConstPtr msg);
 
-  bool Get(const double& tStamp, Eigen::Quaterniond& data);
+  bool Get(const double& tStamp, Eigen::Quaterniond& data)const;
 
-  bool TimeContained(const double);
+  Eigen::Quaterniond Get(const double& tStamp)const;
+
+  bool TimeContained(const double)const;
 
   std::vector<stampedImu>::iterator end() {return data_.end();}
 

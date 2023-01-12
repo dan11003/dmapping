@@ -1,6 +1,27 @@
 #include "dmapping/dmappingfuser.h"
 namespace dmapping {
 
+bool Compensate(RingCloud::Ptr input, RingCloud::Ptr compensated, ImuHandler& handler){
+  const double t0 = input->points.front().time;
+  const double t1 = input->points.back().time;
+  const double tScan = pcl_conversions::fromPCL(input->header.stamp).toSec();
+  if(!handler.TimeContained(tScan + t0) || !handler.TimeContained(tScan + t1) ){
+    std::cout << "no imu data" << std::endl;
+    return false;
+  }
+
+  std::cout << "begin: " <<  t0 << ", end: " << t1<< ", scan:" << GetRelTime(tScan) << std::endl;
+  const Eigen::Affine3d Tinit(handler.Get(tScan));
+  cout << "Tinit" << Tinit.matrix() << endl;
+  for(int i = 0 ; i <input->points.size() ; i++)
+  {
+    const double timeCurrent = tScan + input->points[i].time;
+    const Eigen::Affine3d Tinit(handler.Get(tScan));
+    //cout << input->points[i].time <<  ",";
+  }
+  return true;
+
+}
 
 size_t rosbagReader::Read(){
   std::cout << "open bag file: " <<  par_.bagPath << std::endl;
@@ -62,7 +83,7 @@ LidarBatch::LidarBatch() : nh("~"){
       cout << "PROBLEM TRANSFORM" << endl;
       continue;
     }
-    Eigen::Quaterniond rotTransformed = extrinsicsLid2imu*rot;
+    Eigen::Quaterniond rotTransformed = rot*extrinsicsLid2imu;
     rotTransformed.normalize();
     const Eigen::Affine3d affineRot(rotTransformed);
     const size_t idx = std::distance(scanHandler_.begin(),itr);
@@ -74,6 +95,7 @@ LidarBatch::LidarBatch() : nh("~"){
 
 
 }
+
 void LidarBatch::Visualize(){
   auto itr_scan = scanHandler_.begin();
   auto itr_imu = imuHandler_.begin();
@@ -89,8 +111,13 @@ void LidarBatch::Visualize(){
       itr_imu++;
     }
     else{
+      RingCloud::Ptr compensated(new RingCloud());
+      if(!Compensate(itr_scan->GetRingCloud(), compensated, imuHandler_)){
+        itr_scan++;
+        continue;
+      }
       const Eigen::Affine3d& pose = poses_[std::distance(scanHandler_.begin(),itr_scan)];
-      cout <<"idx: " << std::distance(scanHandler_.begin(),itr_scan) << pose.matrix()  <<endl;
+      cout << "idx: " << std::distance(scanHandler_.begin(),itr_scan) << pose.matrix()  << endl;
       PublishTF(par_.world_frame, par_.sensor_frame, pose, t);
       PublishCloud("Scans", *itr_scan->GetCloud(), par_.sensor_frame, t);
       itr_scan++;

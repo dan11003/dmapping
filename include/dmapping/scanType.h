@@ -20,6 +20,8 @@ public:
 
   Cloud::Ptr GetCloud();
 
+  RingCloud::Ptr GetRingCloud();
+
   double GetStamp() const;
 
 private:

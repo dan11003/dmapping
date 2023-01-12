@@ -9,7 +9,7 @@ Scan::Scan(RingCloud::Ptr cloudInput){
   ros::Time t;
   pcl_conversions::fromPCL(cloud_raw_->header.stamp, t);
   stamp_ = t.toSec();
-  fullcloud_->points.resize(par_.N_SCAN*par_.Horizon_SCAN);
+  //fullcloud_->points.resize(par_.N_SCAN*par_.Horizon_SCAN);
   //projectPointCloud();
   //cout << ", cloud: " << GetRelTime(stamp_);
 }
@@ -25,6 +25,9 @@ Cloud::Ptr Scan::GetCloud(){
     cld->push_back(pnt_tmp);
   }
   return cld;
+}
+RingCloud::Ptr Scan::GetRingCloud(){
+  return cloud_raw_;
 }
 
 double Scan::GetStamp() const{
