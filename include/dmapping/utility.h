@@ -69,11 +69,19 @@ typedef std::vector<Eigen::Affine3d,Eigen::aligned_allocator<Eigen::Affine3d> > 
 
 void PublishCloud(const std::string& topic, Cloud& cloud, const std::string& frame_id, const ros::Time& t);
 
+void PublishCloud(const std::string& topic, RingCloud& cloud, const std::string& frame_id, const ros::Time& t);
+
 void PublishTF(const std::string& fixed_id, const std::string& frame_id, const Eigen::Affine3d& T, const ros::Time& t);
 
 Eigen::Quaterniond euler2Quaternion(const double roll, const double pitch, const double yaw);
 
 double GetRelTime(const double t);
+
+Eigen::Quaterniond Imu2Orientation(const sensor_msgs::Imu& data);
+
+Eigen::Vector3d Imu2AngularVelocity(const sensor_msgs::Imu& data);
+
+Eigen::Vector3d Imu2LinearAcceleration(const sensor_msgs::Imu& data);
 
 //using PointXYZIRT = VelodynePointXYZIRT;
 //typedef pcl::PointCloud<VMapPointNormalelodynePointXYZIRT> VCloud;

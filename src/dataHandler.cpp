@@ -28,35 +28,36 @@ void ImuHandler::AddMsg(sensor_msgs::Imu::ConstPtr msg){
 }
 
 
-void ImuHandler::Add(sensor_msgs::Imu& data){
-  Eigen::Quaterniond orient;
-  double tStamp;
-  tf::quaternionMsgToEigen(data.orientation, orient);
-  tStamp = data.header.stamp.toSec();
-  data_.push_back(std::make_pair(tStamp,orient));
+void ImuHandler::Add(const sensor_msgs::Imu& data){
+  const double tStamp = data.header.stamp.toSec();;
+  //tf::quaternionMsgToEigen(data.orientation, orient);
+  data_.push_back(std::make_pair(tStamp, data));
 }
-
-bool ImuHandler::Get(const double& tStamp, Eigen::Quaterniond& data)const {
+sensor_msgs::Imu Interpolate(const double tSlerp, const sensor_msgs::Imu& data1, const sensor_msgs::Imu& data2){
+  return data1;
+}
+bool ImuHandler::Get(const double& tStamp, sensor_msgs::Imu& data)const {
   auto first = data_.begin();
   auto last = data_.end();
-  stampedImu search = std::make_pair(tStamp,Eigen::Quaterniond());
+  stampedImu search = std::make_pair(tStamp,sensor_msgs::Imu());
   auto itr_after = std::lower_bound(first, last, search , compare);
   auto itr_before = std::prev(itr_after, 1);
   if(itr_after != last && itr_after != first && itr_before != first){
-    data = first->second;
+    //data = first->second;
     //cout << "elements: " << data_.size() << endl;
     //cout << "search: " << GetRelTime(tStamp) << ", before: "<< GetRelTime(itr_before->first) <<", t diff" <<  itr_before->first - tStamp<<", idx: " << std::distance(data_.begin(), itr_before) << endl;
     //cout << "search: " << tStamp << ", next  : "<< itr_after->first <<", t diff" << itr_after->first - tStamp <<", idx: " << std::distance(data_.begin(), itr_after) << endl;
     const double tSlerp = (tStamp - itr_before->first )/(itr_after->first - itr_before->first);
+    data = Interpolate(tSlerp, itr_before->second, itr_after->second);
     //cout << tSlerp << endl;
-    data = itr_before->second.slerp(tSlerp, itr_after->second);
+    //data = itr_before->second.slerp(tSlerp, itr_after->second);
     return true;
   }
   else
     return false;
 }
-Eigen::Quaterniond ImuHandler::Get(const double& tStamp) const{
-  Eigen::Quaterniond data;
+sensor_msgs::Imu ImuHandler::Get(const double& tStamp) const{
+  sensor_msgs::Imu data;
   Get(tStamp, data);
   return data;
 }

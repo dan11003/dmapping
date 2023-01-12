@@ -44,7 +44,7 @@
 
 namespace dmapping{
 
-bool Compensate(RingCloud::Ptr input, RingCloud::Ptr compensated, const ImuHandler& handler);
+bool Compensate(RingCloud::Ptr input, RingCloud::Ptr compensated, ImuHandler& handler, Eigen::Quaterniond& extrinsics);
 
 class rosbagReader{
 public:
@@ -105,6 +105,7 @@ public:
   ScanHandler scanHandler_;
   std::shared_ptr<rosbagReader> reader;
 
+  void PlotAcceleration(const Eigen::Vector3d& acc);
 
   void Prune();
 

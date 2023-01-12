@@ -14,7 +14,7 @@
 /* A steam of time stamped data  for lookup*/
 namespace dmapping {
 
-typedef std::pair<double, Eigen::Quaterniond> stampedImu;
+typedef std::pair<double, sensor_msgs::Imu> stampedImu;
 
 bool compare (const stampedImu i, const stampedImu& j);
 
@@ -26,9 +26,9 @@ public:
 
   void AddMsg(sensor_msgs::Imu::ConstPtr msg);
 
-  bool Get(const double& tStamp, Eigen::Quaterniond& data)const;
+  bool Get(const double& tStamp, sensor_msgs::Imu& data)const;
 
-  Eigen::Quaterniond Get(const double& tStamp)const;
+  sensor_msgs::Imu Get(const double& tStamp) const;
 
   bool TimeContained(const double)const;
 
@@ -40,7 +40,7 @@ public:
 
 private:
 
-  void Add(sensor_msgs::Imu& msg);
+  void Add(const sensor_msgs::Imu& msg);
 
   std::vector<stampedImu> data_;
 
