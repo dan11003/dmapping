@@ -18,15 +18,12 @@ bool Compensate(RingCloud::Ptr input, RingCloud::Ptr compensated, ImuHandler& ha
 
   std::cout << "qInit" << qInit.matrix() << std::endl;
   ros::Time tr0 = ros::Time::now();
-  for(int i = 0 ; i <input->points.size() ; i++)
-  {
+  for(int i = 0 ; i <input->points.size() ; i++){
     const double timeCurrent = tScan + input->points[i].time;
     const Eigen::Quaterniond qNow = Imu2Orientation(handler.Get(timeCurrent))*extrinsics;
     const Eigen::Quaterniond qDiff = qInitInv*qNow;
-    const Eigen::Vector3d pNow(input->points[i].x, input->points[i].y, input->points[i].z);
-    const Eigen::Vector3d pTransformed = qDiff*pNow;
+    const Eigen::Vector3d pTransformed = qDiff*Eigen::Vector3d(input->points[i].x, input->points[i].y, input->points[i].z);
     compensated->points[i].x = pTransformed(0); compensated->points[i].y = pTransformed(1); compensated->points[i].z = pTransformed(2);
-    //cout << input->points[i].time <<  ",";
   }
   ros::Time tr1 = ros::Time::now();
   cout << "time elapse: " << tr1-tr0 << endl;
