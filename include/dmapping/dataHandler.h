@@ -28,7 +28,7 @@ public:
 
   bool Get(const double& tStamp, sensor_msgs::Imu& data)const;
 
-  sensor_msgs::Imu Get(const double& tStamp) const;
+  sensor_msgs::Imu Get(const double& tStamp) const; // Currently no interpolation - nice but not reuqired
 
   bool TimeContained(const double)const;
 
