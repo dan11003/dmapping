@@ -77,11 +77,7 @@ Eigen::Quaterniond euler2Quaternion(const double roll, const double pitch, const
 
 double GetRelTime(const double t);
 
-Eigen::Quaterniond Imu2Orientation(const sensor_msgs::Imu& data);
 
-Eigen::Vector3d Imu2AngularVelocity(const sensor_msgs::Imu& data);
-
-Eigen::Vector3d Imu2LinearAcceleration(const sensor_msgs::Imu& data);
 
 //using PointXYZIRT = VelodynePointXYZIRT;
 //typedef pcl::PointCloud<VMapPointNormalelodynePointXYZIRT> VCloud;

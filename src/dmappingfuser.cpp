@@ -35,7 +35,7 @@ size_t rosbagReader::Read(){
   std::cout << "open bag file: " <<  par_.bagPath << std::endl;
   bag_.open(par_.bagPath, rosbag::bagmode::Read);
 
-  const std::vector<std::string> topics{ par_.imuTopic, par_.lidarTopic};
+  const std::vector<std::string> topics{par_.imuTopic, par_.lidarTopic};
   rosbag::View view(bag_, rosbag::TopicQuery(topics));
   int counter = 0;
 

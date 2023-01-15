@@ -2,17 +2,6 @@
 
 namespace dmapping {
 
-Eigen::Quaterniond Imu2Orientation(const sensor_msgs::Imu& data){
-  return Eigen::Quaterniond(data.orientation.w, data.orientation.x, data.orientation.y, data.orientation.z);
-}
-
-Eigen::Vector3d Imu2AngularVelocity(const sensor_msgs::Imu& data){
-  return Eigen::Vector3d(data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z);
-}
-
-Eigen::Vector3d Imu2LinearAcceleration(const sensor_msgs::Imu& data){
-  return Eigen::Vector3d(data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z);
-}
 
 void PublishCloud(const std::string& topic, RingCloud& cloud, const std::string& frame_id, const ros::Time& t){
 

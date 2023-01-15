@@ -7,12 +7,18 @@
 #include "sensor_msgs/Imu.h" 
 #include "dmapping/scanType.h"
 #include "pcl_conversions/pcl_conversions.h"
-#include <dmapping/utility.h>
+//#include <dmapping/utility.h>
 #include "math.h"
 
 
 /* A steam of time stamped data  for lookup*/
 namespace dmapping {
+
+Eigen::Quaterniond Imu2Orientation(const sensor_msgs::Imu& data);
+
+Eigen::Vector3d Imu2AngularVelocity(const sensor_msgs::Imu& data);
+
+Eigen::Vector3d Imu2LinearAcceleration(const sensor_msgs::Imu& data);
 
 typedef std::pair<double, sensor_msgs::Imu> stampedImu;
 

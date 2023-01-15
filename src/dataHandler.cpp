@@ -4,6 +4,18 @@
 namespace dmapping {
 
 
+Eigen::Quaterniond Imu2Orientation(const sensor_msgs::Imu& data){
+  return Eigen::Quaterniond(data.orientation.w, data.orientation.x, data.orientation.y, data.orientation.z);
+}
+
+Eigen::Vector3d Imu2AngularVelocity(const sensor_msgs::Imu& data){
+  return Eigen::Vector3d(data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z);
+}
+
+Eigen::Vector3d Imu2LinearAcceleration(const sensor_msgs::Imu& data){
+  return Eigen::Vector3d(data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z);
+}
+
 bool compare (const stampedImu i, const stampedImu& j)
 {
   return (i.first < j.first);
